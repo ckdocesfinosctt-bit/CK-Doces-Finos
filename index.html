@@ -3,291 +3,392 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CK Doces Finos | Encomendas Online</title>
+  <title>Confeitaria CK Doces Finos — Encomendas Online</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #faf7f5; color: #2d1e17; }
-    h1, h2, h3 { font-family: 'Playfair Display', serif; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    h1, h2, .brand-font { font-family: 'Playfair Display', serif; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="bg-amber-50/40 text-stone-800 min-h-screen flex flex-col">
 
-  <header class="bg-[#2d1e17] text-amber-50 sticky top-0 z-40 shadow-md">
+  <!-- Cabeçalho -->
+  <header class="bg-white/95 backdrop-blur sticky top-0 z-30 border-b border-amber-100 shadow-sm">
     <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
       <div>
-        <h1 class="text-xl md:text-2xl font-bold text-amber-400">CK Doces Finos</h1>
-        <p class="text-xs text-amber-200/80">Confeitaria Artesanal • Encomendas</p>
+        <h1 class="text-xl sm:text-2xl font-bold text-amber-900 tracking-tight">CK Doces Finos</h1>
+        <p class="text-xs text-stone-500">Encomendas Artesanais • Agendamento Antecipado</p>
       </div>
-      <nav class="flex items-center gap-2 text-sm">
-        <button onclick="switchTab('catalog')" class="px-3 py-1.5 rounded-full bg-amber-600 text-white font-medium">Cardápio</button>
-        <button onclick="switchTab('orders')" class="px-3 py-1.5 rounded-full hover:bg-white/10 text-amber-100">Meus Pedidos</button>
-        <button onclick="openCart()" class="px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 font-semibold flex items-center gap-1">
-          🛒 <span id="cart-count">0</span>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button onclick="switchTab('catalog')" class="text-xs sm:text-sm font-semibold px-3 py-2 rounded-lg hover:bg-amber-50 text-stone-700">Cardápio</button>
+        <button onclick="switchTab('orders')" class="text-xs sm:text-sm font-semibold px-3 py-2 rounded-lg hover:bg-amber-50 text-stone-700">Meus Pedidos</button>
+        <button onclick="openCart()" class="relative bg-amber-700 hover:bg-amber-800 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-full shadow transition flex items-center gap-2">
+          <span>🛒 Sacola</span>
+          <span id="cart-badge" class="bg-white text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">0</span>
         </button>
-      </nav>
+      </div>
     </div>
   </header>
 
-  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6">
-    <!-- CARDÁPIO -->
-    <section id="view-catalog">
-      <div class="bg-gradient-to-r from-amber-900 to-[#3d281e] text-white rounded-2xl p-6 mb-8 shadow-sm">
-        <span class="inline-block text-xs uppercase tracking-widest bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full mb-2">Feito sob encomenda</span>
-        <h2 class="text-2xl md:text-3xl font-bold mb-1">Doces artesanais para momentos inesquecíveis</h2>
-        <p class="text-sm text-amber-100/90">Escolha seus sabores, agende a entrega ou retirada e pague com Pix ou Cartão.</p>
+  <!-- Banner -->
+  <section class="bg-gradient-to-r from-amber-900 via-amber-800 to-stone-900 text-white py-10 px-4">
+    <div class="max-w-5xl mx-auto text-center space-y-3">
+      <span class="inline-block bg-amber-500/20 border border-amber-400/30 text-amber-200 text-xs uppercase tracking-widest px-3 py-1 rounded-full">Produção Sob Encomenda</span>
+      <h2 class="text-3xl sm:text-4xl font-bold">Doces artesanais feitos para celebrar seus melhores momentos</h2>
+      <p class="text-amber-100/80 max-w-xl mx-auto text-sm sm:text-base">Escolha seus sabores favoritos, agende a data e horário de entrega ou retirada e finalize com Pix ou Cartão.</p>
+    </div>
+  </section>
+
+  <!-- Conteúdo Principal -->
+  <main class="max-w-5xl mx-auto px-4 py-8 flex-1 w-full">
+
+    <!-- ABA 1: CATÁLOGO -->
+    <div id="view-catalog">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold text-stone-800">Cardápio de Encomendas</h3>
+        <span class="text-xs text-stone-500 bg-white px-3 py-1 rounded-full border">Pedido mínimo com 24h de antecedência</span>
       </div>
       <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <p class="text-sm text-stone-500 col-span-full text-center py-8">Carregando cardápio...</p>
+        <p class="text-sm text-stone-400 col-span-full text-center py-8">Carregando cardápio...</p>
       </div>
-    </section>
+    </div>
 
-    <!-- MEUS PEDIDOS -->
-    <section id="view-orders" class="hidden max-w-xl mx-auto bg-white rounded-2xl p-6 shadow-sm border border-amber-900/10">
-      <h2 class="text-2xl font-bold mb-2">Acompanhar Pedido</h2>
-      <p class="text-sm text-stone-600 mb-4">Digite seu WhatsApp para consultar o status em tempo real.</p>
+    <!-- ABA 2: CONSULTAR MEUS PEDIDOS -->
+    <div id="view-orders" class="hidden max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-sm border border-amber-100">
+      <h3 class="text-xl font-bold text-amber-900 mb-2">Acompanhar Encomenda</h3>
+      <p class="text-sm text-stone-500 mb-4">Digite seu WhatsApp com DDD usado no pedido para ver o status em tempo real.</p>
       <div class="flex gap-2 mb-6">
-        <input type="tel" id="search-phone" placeholder="Ex: 19999999999" class="flex-1 border border-stone-300 rounded-xl px-4 py-2.5 text-sm" />
-        <button onclick="searchOrders()" class="bg-amber-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm">Buscar</button>
+        <input id="search-phone" type="tel" placeholder="(19) 99999-9999" class="flex-1 border rounded-xl px-4 py-2.5 text-sm focus:outline-amber-600" />
+        <button onclick="searchOrders()" class="bg-amber-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-amber-800">Buscar</button>
       </div>
-      <div id="orders-results" class="space-y-4"></div>
-    </section>
+      <div id="orders-results" class="space-y-3"></div>
+    </div>
 
-    <!-- PAINEL GESTOR -->
-    <section id="view-admin" class="hidden space-y-6">
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-900/10 flex flex-wrap items-center justify-between gap-3">
+    <!-- ABA 3: PAINEL ADMINISTRATIVO -->
+    <div id="view-admin" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-amber-100 space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
         <div>
-          <h2 class="text-xl font-bold">Gestor CK Doces Finos</h2>
-          <p class="text-xs text-stone-500">Gerencie encomendas e edite seu cardápio em tempo real</p>
+          <h3 class="text-xl font-bold text-amber-900">Painel da Confeitaria</h3>
+          <p class="text-xs text-stone-500">Gerencie suas encomendas agendadas e edite os itens do cardápio.</p>
         </div>
-        <div class="flex gap-2 text-xs font-bold">
-          <button onclick="switchAdminSub('orders')" id="sub-btn-orders" class="px-4 py-2 rounded-xl bg-amber-700 text-white">Encomendas</button>
-          <button onclick="switchAdminSub('menu')" id="sub-btn-menu" class="px-4 py-2 rounded-xl bg-stone-100 text-stone-700">Editar Cardápio</button>
+        <div class="flex gap-2">
+          <button onclick="switchAdminSub('orders')" id="sub-btn-orders" class="px-4 py-2 rounded-xl text-xs font-bold bg-amber-700 text-white">📦 Encomendas</button>
+          <button onclick="switchAdminSub('menu')" id="sub-btn-menu" class="px-4 py-2 rounded-xl text-xs font-bold bg-stone-100 text-stone-700 hover:bg-stone-200">🧁 Gerenciar Cardápio</button>
+          <button onclick="switchTab('catalog')" class="px-3 py-2 rounded-xl text-xs text-stone-500 hover:bg-stone-100">Sair</button>
         </div>
       </div>
 
-      <div id="admin-sub-orders" class="bg-white rounded-2xl p-6 shadow-sm border border-amber-900/10">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-bold text-lg">Pedidos Recebidos</h3>
-          <button onclick="loadAdminOrders()" class="bg-stone-100 px-3 py-1.5 rounded-lg text-xs font-semibold">Atualizar</button>
+      <!-- Sub-aba: Encomendas -->
+      <div id="admin-sub-orders" class="space-y-4">
+        <div class="flex justify-end">
+          <button onclick="loadAdminOrders()" class="bg-stone-100 hover:bg-stone-200 px-3 py-1.5 rounded-lg text-xs font-semibold">🔄 Atualizar Pedidos</button>
         </div>
         <div id="admin-orders-list" class="space-y-4"></div>
       </div>
 
+      <!-- Sub-aba: Gerenciar Cardápio -->
       <div id="admin-sub-menu" class="hidden space-y-6">
-        <form id="product-form" onsubmit="saveProduct(event)" class="bg-white rounded-2xl p-6 shadow-sm border border-amber-900/10 space-y-3 text-sm">
-          <div class="flex justify-between items-center">
-            <h3 class="font-bold text-lg" id="prod-form-title">+ Adicionar Novo Doce</h3>
-            <button type="button" onclick="resetProductForm()" id="btn-cancel-edit" class="hidden text-xs text-red-600 underline">Cancelar Edição</button>
+        <form id="product-form" onsubmit="saveProduct(event)" class="bg-amber-50/60 border border-amber-200 rounded-2xl p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h4 id="prod-form-title" class="font-bold text-amber-900 text-sm">+ Adicionar Novo Doce ao Cardápio</h4>
+            <button type="button" id="btn-cancel-edit" onclick="resetProductForm()" class="hidden text-xs text-red-600 underline">Cancelar edição</button>
           </div>
           <input type="hidden" id="edit-prod-id" />
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div class="sm:col-span-2">
-              <label class="block font-semibold mb-1">Nome do Produto *</label>
-              <input type="text" id="prod-name" required placeholder="Ex: Brownie Ninho com Nutella" class="w-full border border-stone-300 rounded-xl px-3 py-2" />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-semibold text-stone-600">Nome do Produto *</label>
+              <input id="prod-name" required placeholder="Ex: Cento de Brigadeiro Gourmet" class="w-full border rounded-xl px-3 py-2 text-sm bg-white mt-1" />
             </div>
             <div>
-              <label class="block font-semibold mb-1">Preço (R$) *</label>
-              <input type="number" step="0.01" id="prod-price" required placeholder="Ex: 16.00" class="w-full border border-stone-300 rounded-xl px-3 py-2" />
+              <label class="text-xs font-semibold text-stone-600">Preço (R$) *</label>
+              <input id="prod-price" type="number" step="0.01" min="0.50" required placeholder="Ex: 140.00" class="w-full border rounded-xl px-3 py-2 text-sm bg-white mt-1" />
             </div>
           </div>
           <div>
-            <label class="block font-semibold mb-1">Descrição</label>
-            <input type="text" id="prod-desc" placeholder="Descrição do doce..." class="w-full border border-stone-300 rounded-xl px-3 py-2" />
+            <label class="text-xs font-semibold text-stone-600">Descrição curta</label>
+            <input id="prod-desc" placeholder="Ex: Feito com chocolate nobre belga e confeitos selecionados." class="w-full border rounded-xl px-3 py-2 text-sm bg-white mt-1" />
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block font-semibold mb-1">Sabores (separados por vírgula)</label>
-              <input type="text" id="prod-flavors" placeholder="Ex: Tradicional, Ninho com Nutella" class="w-full border border-stone-300 rounded-xl px-3 py-2" />
+              <label class="text-xs font-semibold text-stone-600">Sabores / Opções (separados por vírgula)</label>
+              <input id="prod-flavors" placeholder="Ex: Ao Leite, Ninho com Nutella, Churros" class="w-full border rounded-xl px-3 py-2 text-sm bg-white mt-1" />
             </div>
             <div>
-              <label class="block font-semibold mb-1">Link da Foto (URL)</label>
-              <input type="url" id="prod-img" placeholder="https://..." class="w-full border border-stone-300 rounded-xl px-3 py-2" />
+              <label class="text-xs font-semibold text-stone-600">Link da Foto (URL)</label>
+              <input id="prod-img" type="url" placeholder="https://..." class="w-full border rounded-xl px-3 py-2 text-sm bg-white mt-1" />
             </div>
           </div>
-          <button type="submit" class="bg-emerald-600 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow">Salvar no Cardápio</button>
+          <button type="submit" id="btn-save-prod" class="bg-amber-700 hover:bg-amber-800 text-white font-bold px-5 py-2.5 rounded-xl text-sm">Salvar Produto no Cardápio</button>
         </form>
 
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-amber-900/10">
-          <h3 class="font-bold text-lg mb-4">Itens Cadastrados</h3>
+        <div>
+          <h4 class="font-bold text-stone-800 text-sm mb-3">Itens Cadastrados</h4>
           <div id="admin-products-list" class="space-y-3"></div>
         </div>
       </div>
-    </section>
+    </div>
+
   </main>
 
-  <!-- MODAL CARRINHO -->
-  <div id="cart-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 max-h-[92vh] overflow-y-auto shadow-2xl">
-      <div class="flex items-center justify-between border-b pb-3 mb-4">
-        <h3 class="text-xl font-bold">Finalizar Encomenda</h3>
-        <button onclick="closeCart()" class="text-stone-400 text-2xl">&times;</button>
-      </div>
+  <!-- Rodapé -->
+  <footer class="bg-white border-t border-amber-100 py-6 px-4 text-center text-xs text-stone-400">
+    <p>Confeitaria CK Doces Finos © 2026 • Campinas - SP</p>
+    <button onclick="openAdmin()" class="mt-2 underline hover:text-amber-700">Área da Confeitaria</button>
+  </footer>
 
-      <div id="checkout-form-step">
-        <div id="cart-items" class="space-y-3 mb-4 max-h-48 overflow-y-auto"></div>
-        <div class="border-t pt-3 mb-4 flex justify-between font-bold text-lg">
-          <span>Total:</span>
-          <span id="cart-total" class="text-amber-800">R$ 0,00</span>
+  <!-- DRAWER DO CARRINHO E CHECKOUT -->
+  <div id="cart-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex justify-end">
+    <div class="bg-white w-full max-w-md h-full overflow-y-auto p-6 flex flex-col justify-between shadow-2xl">
+      <div>
+        <div class="flex items-center justify-between border-b pb-4 mb-4">
+          <h3 class="text-lg font-bold text-amber-900">Sua Encomenda</h3>
+          <button onclick="closeCart()" class="text-stone-400 hover:text-stone-700 text-xl font-bold">&times;</button>
         </div>
-        <form onsubmit="submitOrder(event)" class="space-y-3 text-sm">
-          <div><label class="block font-semibold mb-1">Seu Nome *</label><input type="text" id="cust-name" required class="w-full border rounded-xl px-3 py-2" /></div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div><label class="block font-semibold mb-1">WhatsApp *</label><input type="tel" id="cust-phone" required placeholder="19999999999" class="w-full border rounded-xl px-3 py-2" /></div>
-            <div><label class="block font-semibold mb-1">E-mail *</label><input type="email" id="cust-email" required class="w-full border rounded-xl px-3 py-2" /></div>
+
+        <!-- ETAPA 1: ITENS E FORMULÁRIO -->
+        <div id="checkout-form-step">
+          <div id="cart-items" class="space-y-3 mb-4"></div>
+          <div class="border-t border-b py-3 mb-4 flex justify-between font-bold text-base">
+            <span>Total</span>
+            <span id="cart-total" class="text-amber-800">R$ 0,00</span>
           </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div><label class="block font-semibold mb-1">Data *</label><input type="date" id="sched-date" required class="w-full border rounded-xl px-3 py-2" /></div>
-            <div><label class="block font-semibold mb-1">Horário *</label>
-              <select id="sched-slot" class="w-full border rounded-xl px-3 py-2">
-                <option value="10:00 - 12:00">10:00 - 12:00</option>
-                <option value="14:00 - 16:00">14:00 - 16:00</option>
-                <option value="16:00 - 18:00">16:00 - 18:00</option>
-                <option value="18:00 - 20:00">18:00 - 20:00</option>
+
+          <form id="order-form" onsubmit="submitOrder(event)" class="space-y-3 text-sm">
+            <div>
+              <label class="font-semibold text-xs text-stone-600">Seu Nome Completo *</label>
+              <input id="cust-name" required class="w-full border rounded-xl px-3 py-2 mt-1" placeholder="Ex: Maria Silva" />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="font-semibold text-xs text-stone-600">WhatsApp (com DDD) *</label>
+                <input id="cust-phone" required type="tel" class="w-full border rounded-xl px-3 py-2 mt-1" placeholder="19999999999" />
+              </div>
+              <div>
+                <label class="font-semibold text-xs text-stone-600">E-mail *</label>
+                <input id="cust-email" required type="email" class="w-full border rounded-xl px-3 py-2 mt-1" placeholder="seu@email.com" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="font-semibold text-xs text-stone-600">Data da Encomenda *</label>
+                <input id="sched-date" required type="date" class="w-full border rounded-xl px-3 py-2 mt-1" />
+              </div>
+              <div>
+                <label class="font-semibold text-xs text-stone-600">Janela de Horário *</label>
+                <select id="sched-slot" required class="w-full border rounded-xl px-3 py-2 mt-1 bg-white">
+                  <option value="10:00 - 12:00">10:00 às 12:00</option>
+                  <option value="14:00 - 16:00">14:00 às 16:00</option>
+                  <option value="16:00 - 18:00">16:00 às 18:00</option>
+                  <option value="18:00 - 20:00">18:00 às 20:00</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="font-semibold text-xs text-stone-600">Recebimento *</label>
+              <select id="delivery-type" onchange="toggleAddress()" class="w-full border rounded-xl px-3 py-2 mt-1 bg-white">
+                <option value="pickup">Retirada no Local (Grátis)</option>
+                <option value="delivery">Entrega em Campinas (A combinar / Uber Flash)</option>
               </select>
             </div>
-          </div>
-          <div><label class="block font-semibold mb-1">Recebimento *</label>
-            <select id="delivery-type" onchange="toggleAddress()" class="w-full border rounded-xl px-3 py-2">
-              <option value="pickup">Retirada no Local (Grátis)</option>
-              <option value="delivery">Entrega (Delivery)</option>
-            </select>
-          </div>
-          <div id="address-box" class="hidden"><label class="block font-semibold mb-1">Endereço Completo *</label><input type="text" id="cust-address" class="w-full border rounded-xl px-3 py-2" /></div>
-          <div><label class="block font-semibold mb-1">Pagamento *</label>
-            <div class="grid grid-cols-2 gap-2">
-              <label class="border rounded-xl p-2.5 flex items-center gap-2"><input type="radio" name="pay-method" value="pix" checked /><span>Pix</span></label>
-              <label class="border rounded-xl p-2.5 flex items-center gap-2"><input type="radio" name="pay-method" value="card" /><span>Cartão</span></label>
+
+            <div id="address-box" class="hidden">
+              <label class="font-semibold text-xs text-stone-600">Endereço Completo para Entrega *</label>
+              <input id="cust-address" class="w-full border rounded-xl px-3 py-2 mt-1" placeholder="Rua, número, bairro e complemento" />
+            </div>
+
+            <div>
+              <label class="font-semibold text-xs text-stone-600">Forma de Pagamento *</label>
+              <div class="grid grid-cols-2 gap-2 mt-1">
+                <label class="border rounded-xl p-2.5 flex items-center gap-2 cursor-pointer has-[:checked]:border-amber-600 has-[:checked]:bg-amber-50">
+                  <input type="radio" name="pay-method" value="pix" checked />
+                  <span class="font-semibold text-xs">Pix Instantâneo</span>
+                </label>
+                <label class="border rounded-xl p-2.5 flex items-center gap-2 cursor-pointer has-[:checked]:border-amber-600 has-[:checked]:bg-amber-50">
+                  <input type="radio" name="pay-method" value="card" />
+                  <span class="font-semibold text-xs">Cartão Crédito</span>
+                </label>
+              </div>
+            </div>
+
+            <button id="btn-submit-order" type="submit" class="w-full bg-amber-700 hover:bg-amber-800 text-white font-bold py-3 rounded-xl shadow-md transition mt-2">
+              Finalizar e Ir para Pagamento
+            </button>
+          </form>
+        </div>
+
+        <!-- ETAPA 2: PAGAMENTO PIX -->
+        <div id="pix-payment-step" class="hidden text-center space-y-4 py-4">
+          <span class="inline-block bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Aguardando Pagamento Pix</span>
+          <h4 class="font-bold text-lg">Escaneie o QR Code abaixo</h4>
+          <img id="pix-qr-img" class="w-48 h-48 mx-auto border rounded-xl p-2 bg-white shadow-sm" alt="QR Code Pix" />
+          <div class="text-left">
+            <label class="text-xs font-semibold text-stone-500">Ou copie o código Pix Copia e Cola:</label>
+            <div class="flex gap-2 mt-1">
+              <input id="pix-copy-paste" readonly class="flex-1 border rounded-lg px-2 py-1.5 text-xs bg-stone-50" />
+              <button onclick="copyPix()" class="bg-stone-800 text-white text-xs px-3 py-1.5 rounded-lg font-semibold">Copiar</button>
             </div>
           </div>
-          <button type="submit" id="btn-submit-order" class="w-full bg-amber-700 text-white font-bold py-3 rounded-xl shadow mt-2">Confirmar e Pagar</button>
-        </form>
-      </div>
-
-      <div id="pix-payment-step" class="hidden text-center space-y-4">
-        <span class="inline-block bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">Aguardando Pagamento Pix</span>
-        <h4 class="text-lg font-bold">Escaneie o QR Code ou copie o código</h4>
-        <img id="pix-qr-img" src="" class="w-48 h-48 mx-auto border rounded-xl p-2" />
-        <div class="flex gap-2">
-          <input type="text" id="pix-copy-paste" readonly class="flex-1 bg-stone-100 border rounded-xl px-3 py-2 text-xs" />
-          <button onclick="copyPix()" class="bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-bold">Copiar</button>
+          <p class="text-xs text-stone-500 animate-pulse">Confirmando pagamento automaticamente...</p>
         </div>
-        <p class="text-xs text-stone-500 animate-pulse">Verificando pagamento automaticamente...</p>
-      </div>
 
-      <div id="order-confirmed-step" class="hidden text-center space-y-4 py-4">
-        <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-3xl mx-auto">✓</div>
-        <h4 class="text-2xl font-bold text-emerald-800">Pedido Confirmado!</h4>
-        <p class="text-sm text-stone-600" id="confirmed-summary"></p>
-        <a id="btn-whatsapp-confirm" href="#" target="_blank" class="block w-full bg-emerald-600 text-white font-bold py-3 rounded-xl shadow">📲 Enviar no WhatsApp da Loja</a>
-        <button onclick="resetAndClose()" class="text-xs text-stone-500 underline">Voltar ao Cardápio</button>
+        <!-- ETAPA 3: PEDIDO CONFIRMADO -->
+        <div id="order-confirmed-step" class="hidden text-center space-y-4 py-6">
+          <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl">✓</div>
+          <h4 class="text-xl font-bold text-stone-800">Encomenda Confirmada!</h4>
+          <p id="confirmed-summary" class="text-sm text-stone-600"></p>
+          <a id="btn-whatsapp-confirm" target="_blank" class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow">
+            📲 Enviar Comprovante no WhatsApp
+          </a>
+          <button onclick="resetAndClose()" class="text-xs text-stone-500 underline">Voltar ao cardápio</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <footer class="bg-[#2d1e17] text-amber-200/70 text-xs py-6 mt-12">
-    <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-      <p>© 2026 CK Doces Finos — Todos os direitos reservados.</p>
-      <button onclick="openAdmin()" class="hover:text-amber-300 underline">Área da Confeitaria</button>
-    </div>
-  </footer>
-
   <script>
-    const SUPABASE_URL = "https://rlpzeoyhwcsybenscoxb.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_wZzbA8uuhP-hHKdYDyEyeA_GRpF96LE";
-    const EDGE_FUNCTION_NAME = "bright-task";
-    const STORE_WHATSAPP = "5511978365041";
+    // ==========================================
+    // CONFIGURAÇÕES DO SUPABASE E DA CONFEITARIA
+    // ==========================================
+    const SUPABASE_URL = "https://epqejwibcxtngjngzazk.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_wZzbA8uuhP-hHKdYDyEyeA_GRpF96LE";
+    const WHATSAPP_CONFEITARIA = "5519999999999";
     const ADMIN_PIN = "1234";
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let PRODUCTS = [], cart = [], pollInterval = null;
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    const DEFAULT_PRODUCTS = [
+      { id: 1, name: "Cento de Brigadeiro Gourmet", price: 140.00, desc: "100 unidades feitas com chocolate nobre belga e confeitos selecionados.", flavors: ["Ao Leite", "Ninho com Nutella", "Churros", "Creme Brûlée"], img: "https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?w=600&q=80", active: true },
+      { id: 2, name: "Caixa Presente 12 Doces Finos", price: 48.00, desc: "Caixa cartonada elegante com laço, ideal para presentear.", flavors: ["Mista Clássica", "Só Chocolate", "Morango & Ninho"], img: "https://images.unsplash.com/photo-1548907040-4baa42d10919?w=600&q=80", active: true },
+      { id: 3, name: "Torta Brownie Chocolatuda (1,5kg)", price: 115.00, desc: "Base densa de brownie com camadas generosas de brigadeiro cremoso.", flavors: ["Ninho c/ Nutella", "Ferrero Rocher", "Kinder Bueno"], img: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&q=80", active: true },
+      { id: 4, name: "Kit Festa Mini Brownies (30 un.)", price: 95.00, desc: "Brownies individuais embalados com cobertura artesanal.", flavors: ["Doce de Leite", "Brigadeiro Meio Amargo", "Ninho"], img: "https://images.unsplash.com/photo-1515037893149-de7f840978e2?w=600&q=80", active: true }
+    ];
+
+    let PRODUCTS = [];
+    let cart = [];
+    let pollInterval = null;
+
+    // Define data mínima como amanhã (24h antecedência)
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+    document.getElementById("sched-date").min = tomorrow;
+    document.getElementById("sched-date").value = tomorrow;
+
+    // Carregar Produtos do Supabase (com fallback automático)
     async function loadProducts() {
-      const grid = document.getElementById("products-grid");
-      try {
-        let { data, error } = await sb.from("products").select("*").order("id", { ascending: true });
-        if (error) throw error;
-        if (!data || data.length === 0) {
-          const seed = await sb.from("products").insert([{
-            name: "Item Teste Pix",
-            price: 1.00,
-            description: "Produto de teste para validar pagamento real.",
-            flavors: ["Padrão"],
-            img: "https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?w=600&q=80",
-            active: true
-          }]).select();
-          if (!seed.error && seed.data) data = seed.data;
-        }
-        PRODUCTS = data || [];
-        renderProducts();
-        renderAdminProducts();
-      } catch (err) {
-        grid.innerHTML = `<div class="col-span-full bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl text-xs"><strong>Erro ao carregar banco:</strong> ${err.message}</div>`;
+      const { data, error } = await sb.from("products").select("*").order("id", { ascending: true });
+      if (!error && data && data.length > 0) {
+        PRODUCTS = data.map(p => ({ ...p, desc: p.description || "" }));
+      } else {
+        PRODUCTS = DEFAULT_PRODUCTS;
       }
+      renderCatalog();
+      renderAdminProducts();
     }
 
-    function renderProducts() {
+    // Renderizar Catálogo Público
+    function renderCatalog() {
       const grid = document.getElementById("products-grid");
-      const activeItems = PRODUCTS.filter(p => p.active);
-      if (!activeItems.length) {
-        grid.innerHTML = `<p class="text-sm text-stone-500 col-span-full text-center py-8">Nenhum item disponível no momento. Entre na Área da Confeitaria para cadastrar.</p>`;
+      const activeProds = PRODUCTS.filter(p => p.active !== false);
+      if (!activeProds.length) {
+        grid.innerHTML = `<p class="text-sm text-stone-400 col-span-full text-center py-8">Nenhum item disponível no momento.</p>`;
         return;
       }
-      grid.innerHTML = activeItems.map(p => {
+      grid.innerHTML = activeProds.map(p => {
         const flavors = (p.flavors && p.flavors.length) ? p.flavors : ["Tradicional"];
-        const img = p.img || "https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?w=600&q=80";
         return `
-          <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-amber-900/10 flex flex-col">
-            <img src="${img}" class="h-44 w-full object-cover" />
-            <div class="p-4 flex-1 flex flex-col justify-between">
-              <div>
-                <h3 class="font-bold text-lg">${p.name}</h3>
-                <p class="text-xs text-stone-500 mt-1 mb-3">${p.description || ""}</p>
+        <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-amber-100/80 flex flex-col justify-between hover:shadow-md transition">
+          <div>
+            <img src="${p.img || 'https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?w=600&q=80'}" alt="${p.name}" class="w-full h-44 object-cover" />
+            <div class="p-4 space-y-2">
+              <div class="flex justify-between items-start gap-2">
+                <h4 class="font-bold text-stone-800 leading-snug">${p.name}</h4>
+                <span class="font-bold text-amber-800 whitespace-nowrap">R$ ${Number(p.price).toFixed(2).replace('.', ',')}</span>
               </div>
-              <div class="space-y-2.5">
-                <select id="flavor-${p.id}" class="w-full border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50">
+              <p class="text-xs text-stone-500">${p.desc}</p>
+              <div class="pt-2">
+                <label class="text-[11px] font-semibold text-stone-600">Escolha o Sabor:</label>
+                <select id="flavor-${p.id}" class="w-full border rounded-lg px-2.5 py-1.5 text-xs mt-1 bg-stone-50">
                   ${flavors.map(f => `<option value="${f}">${f}</option>`).join("")}
                 </select>
-                <div class="flex items-center justify-between pt-1">
-                  <span class="font-bold text-amber-800">R$ ${Number(p.price).toFixed(2).replace('.', ',')}</span>
-                  <button onclick="addToCart(${p.id})" class="bg-amber-700 text-white text-xs font-bold px-4 py-2 rounded-xl">+ Adicionar</button>
-                </div>
               </div>
             </div>
-          </div>`;
+          </div>
+          <div class="p-4 pt-0">
+            <button onclick="addToCart(${p.id})" class="w-full bg-amber-100 hover:bg-amber-700 hover:text-white text-amber-900 font-bold text-xs py-2.5 rounded-xl transition">
+              + Adicionar à Encomenda
+            </button>
+          </div>
+        </div>`;
       }).join("");
     }
 
+    // Carrinho
     function addToCart(id) {
-      const p = PRODUCTS.find(x => x.id === id);
+      const prod = PRODUCTS.find(p => p.id === id);
+      if (!prod) return;
       const flavor = document.getElementById(`flavor-${id}`).value;
-      const ex = cart.find(i => i.id === id && i.flavor === flavor);
-      if (ex) ex.qty += 1; else cart.push({ id: p.id, name: p.name, price: Number(p.price), flavor, qty: 1 });
+      const existing = cart.find(item => item.id === id && item.flavor === flavor);
+      if (existing) existing.qty++;
+      else cart.push({ id: prod.id, name: prod.name, price: Number(prod.price), flavor, qty: 1 });
+      updateCartUI();
+      openCart();
+    }
+
+    function changeQty(idx, delta) {
+      cart[idx].qty += delta;
+      if (cart[idx].qty <= 0) cart.splice(idx, 1);
       updateCartUI();
     }
-    function removeFromCart(idx) { cart.splice(idx, 1); updateCartUI(); }
+
     function updateCartUI() {
-      document.getElementById("cart-count").innerText = cart.reduce((a, i) => a + i.qty, 0);
-      const box = document.getElementById("cart-items");
-      box.innerHTML = !cart.length ? `<p class="text-center text-sm text-stone-400 py-4">Carrinho vazio.</p>` : cart.map((i, idx) => `
-        <div class="flex justify-between items-center bg-stone-50 p-2.5 rounded-xl text-xs">
-          <div><p class="font-bold">${i.qty}x ${i.name}</p><p class="text-stone-500">${i.flavor}</p></div>
-          <div class="flex items-center gap-3"><span class="font-bold">R$ ${(i.price * i.qty).toFixed(2).replace('.', ',')}</span><button onclick="removeFromCart(${idx})" class="text-red-500 font-bold">✕</button></div>
-        </div>`).join("");
-      document.getElementById("cart-total").innerText = `R$ ${cart.reduce((a, i) => a + i.price * i.qty, 0).toFixed(2).replace('.', ',')}`;
+      const totalItems = cart.reduce((acc, i) => acc + i.qty, 0);
+      const totalValue = cart.reduce((acc, i) => acc + i.price * i.qty, 0);
+      document.getElementById("cart-badge").innerText = totalItems;
+      document.getElementById("cart-total").innerText = `R$ ${totalValue.toFixed(2).replace('.', ',')}`;
+
+      const container = document.getElementById("cart-items");
+      if (!cart.length) {
+        container.innerHTML = `<p class="text-xs text-stone-400 text-center py-4">Sua sacola está vazia.</p>`;
+        return;
+      }
+      container.innerHTML = cart.map((item, idx) => `
+        <div class="flex items-center justify-between bg-stone-50 p-2.5 rounded-xl border text-xs">
+          <div>
+            <p class="font-bold text-stone-800">${item.name}</p>
+            <p class="text-stone-500">Sabor: ${item.flavor}</p>
+            <p class="text-amber-800 font-semibold">R$ ${(item.price * item.qty).toFixed(2).replace('.', ',')}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="changeQty(${idx}, -1)" class="w-6 h-6 rounded-full bg-white border font-bold">-</button>
+            <span class="font-bold">${item.qty}</span>
+            <button onclick="changeQty(${idx}, 1)" class="w-6 h-6 rounded-full bg-white border font-bold">+</button>
+          </div>
+        </div>
+      `).join("");
     }
 
-    function openCart() { updateCartUI(); document.getElementById("cart-modal").classList.remove("hidden"); }
+    function openCart() { document.getElementById("cart-modal").classList.remove("hidden"); updateCartUI(); }
     function closeCart() { document.getElementById("cart-modal").classList.add("hidden"); if (pollInterval) clearInterval(pollInterval); }
-    function resetAndClose() { cart = []; updateCartUI(); document.getElementById("checkout-form-step").classList.remove("hidden"); document.getElementById("pix-payment-step").classList.add("hidden"); document.getElementById("order-confirmed-step").classList.add("hidden"); closeCart(); }
-    function toggleAddress() { document.getElementById("address-box").classList.toggle("hidden", document.getElementById("delivery-type").value === "pickup"); }
+    function resetAndClose() {
+      cart = []; updateCartUI();
+      document.getElementById("checkout-form-step").classList.remove("hidden");
+      document.getElementById("pix-payment-step").classList.add("hidden");
+      document.getElementById("order-confirmed-step").classList.add("hidden");
+      closeCart();
+    }
+    function toggleAddress() { document.getElementById("address-box").classList.toggle("hidden", document.getElementById("delivery-type").value !== "delivery"); }
 
+    // Enviar Pedido e Gerar Pagamento
     async function submitOrder(e) {
       e.preventDefault();
-      if (!cart.length) return alert("Adicione um doce ao carrinho!");
-      const btn = document.getElementById("btn-submit-order"); btn.disabled = true; btn.innerText = "Processando...";
-      const total = cart.reduce((a, i) => a + i.price * i.qty, 0);
+      if (!cart.length) return alert("Adicione pelo menos 1 doce à encomenda.");
+      const btn = document.getElementById("btn-submit-order");
+      btn.disabled = true; btn.innerText = "Processando encomenda...";
+
+      const total = cart.reduce((acc, i) => acc + i.price * i.qty, 0);
       const customerName = document.getElementById("cust-name").value.trim();
       const customerPhone = document.getElementById("cust-phone").value.replace(/\D/g, "");
       const customerEmail = document.getElementById("cust-email").value.trim();
@@ -300,17 +401,20 @@
       try {
         const { data: order, error } = await sb.from("orders").insert([{
           customer_name: customerName, customer_phone: customerPhone, customer_email: customerEmail,
-          items: cart, total, delivery_type: deliveryType, address: deliveryType === "delivery" ? address : "Retirada",
-          scheduled_date: scheduledDate, scheduled_slot: scheduledSlot, payment_method: method, payment_status: "pending", order_status: "aguardando_pagamento"
+          items: cart, total, delivery_type: deliveryType,
+          address: deliveryType === "delivery" ? address : "Retirada no Local",
+          scheduled_date: scheduledDate, scheduled_slot: scheduledSlot,
+          payment_method: method, payment_status: "pending", order_status: "aguardando_pagamento"
         }]).select().single();
         if (error) throw error;
 
-        const fnRes = await fetch(`${SUPABASE_URL}/functions/v1/${EDGE_FUNCTION_NAME}`, {
-          method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${SUPABASE_KEY}` },
-          body: JSON.stringify({ method, orderId: String(order.id), total, customerName, customerEmail })
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/mp-payment`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({ action: "create_payment", orderId: order.id, total, method, customerEmail, customerName })
         });
-        const payData = await fnRes.json();
-        if (!fnRes.ok) throw new Error(payData.error || "Erro no pagamento");
+        const payData = await res.json();
+        if (!res.ok) throw new Error(payData.error || "Erro ao gerar pagamento");
 
         if (method === "pix") {
           document.getElementById("checkout-form-step").classList.add("hidden");
@@ -318,28 +422,27 @@
           document.getElementById("pix-qr-img").src = `data:image/png;base64,${payData.qr_code_base64}`;
           document.getElementById("pix-copy-paste").value = payData.qr_code;
           pollInterval = setInterval(async () => {
-            const cRes = await fetch(`${SUPABASE_URL}/functions/v1/${EDGE_FUNCTION_NAME}`, {
-                            method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${SUPABASE_KEY}` },
-              body: JSON.stringify({ action: "check_status", paymentId: payData.payment_id, orderId: String(order.id) })
+            const cRes = await fetch(`${SUPABASE_URL}/functions/v1/mp-payment`, {
+              method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
+              body: JSON.stringify({ action: "check_status", paymentId: payData.payment_id, orderId: order.id })
             });
             const st = await cRes.json();
             if (st.status === "approved") { clearInterval(pollInterval); showOrderConfirmed(order); }
           }, 4000);
         } else { window.location.href = payData.init_point; }
       } catch (err) { alert("Erro: " + err.message); }
-      finally { btn.disabled = false; btn.innerText = "Confirmar e Pagar"; }
+      finally { btn.disabled = false; btn.innerText = "Finalizar e Ir para Pagamento"; }
     }
 
-    function copyPix() { const i = document.getElementById("pix-copy-paste"); i.select(); navigator.clipboard.writeText(i.value); alert("Pix copiado!"); }
+    function copyPix() { const i = document.getElementById("pix-copy-paste"); i.select(); navigator.clipboard.writeText(i.value); alert("Código Pix copiado!"); }
     function showOrderConfirmed(order) {
       document.getElementById("pix-payment-step").classList.add("hidden");
       document.getElementById("order-confirmed-step").classList.remove("hidden");
       const itens = order.items.map(i => `• ${i.qty}x ${i.name} (${i.flavor})`).join("%0A");
-      const msg = `Olá, CK Doces Finos! Paguei o pedido *#${order.id}*.%0A*Cliente:* ${order.customer_name}%0A*Data:* ${order.scheduled_date} (${order.scheduled_slot})%0A${itens}%0A*Total:* R$ ${Number(order.total).toFixed(2)}`;
+      const msg = `Olá, CK Doces Finos! Paguei o pedido *#${order.id}*:%0A${itens}%0A*Data:* ${order.scheduled_date} (${order.scheduled_slot})%0A*Total:* R$ ${Number(order.total).toFixed(2)}`;
       document.getElementById("confirmed-summary").innerText = `Pedido #${order.id} agendado para ${order.scheduled_date} (${order.scheduled_slot}).`;
-      document.getElementById("btn-whatsapp-confirm").href = `https://wa.me/${STORE_WHATSAPP}?text=${msg}`;
+      document.getElementById("btn-whatsapp-confirm").href = `https://wa.me/${WHATSAPP_CONFEITARIA}?text=${msg}`;
     }
-    
 
     async function searchOrders() {
       const phone = document.getElementById("search-phone").value.replace(/\D/g, "");
@@ -348,7 +451,7 @@
       document.getElementById("orders-results").innerHTML = !data?.length ? `<p class="text-sm text-stone-500 text-center py-4">Nenhum pedido encontrado.</p>` : data.map(o => `
         <div class="border rounded-xl p-4 bg-stone-50 text-sm space-y-1">
           <div class="flex justify-between font-bold"><span>Pedido #${o.id}</span><span class="uppercase text-xs px-2 py-0.5 rounded bg-amber-200">${o.order_status.replace('_', ' ')}</span></div>
-          <p class="text-xs text-stone-600">${o.scheduled_date} •${o.scheduled_slot}</p>
+          <p class="text-xs text-stone-600">${o.scheduled_date} • ${o.scheduled_slot}</p>
           <p class="text-xs text-stone-600">${o.items.map(i => `${i.qty}x ${i.name}`).join(", ")}</p>
           <p class="font-bold text-amber-800 pt-1">Total: R$ ${Number(o.total).toFixed(2)}</p>
         </div>`).join("");
@@ -363,8 +466,8 @@
     function switchAdminSub(sub) {
       document.getElementById("admin-sub-orders").classList.toggle("hidden", sub !== "orders");
       document.getElementById("admin-sub-menu").classList.toggle("hidden", sub !== "menu");
-      document.getElementById("sub-btn-orders").className = sub === "orders" ? "px-4 py-2 rounded-xl bg-amber-700 text-white" : "px-4 py-2 rounded-xl bg-stone-100 text-stone-700";
-      document.getElementById("sub-btn-menu").className = sub === "menu" ? "px-4 py-2 rounded-xl bg-amber-700 text-white" : "px-4 py-2 rounded-xl bg-stone-100 text-stone-700";
+      document.getElementById("sub-btn-orders").className = sub === "orders" ? "px-4 py-2 rounded-xl text-xs font-bold bg-amber-700 text-white" : "px-4 py-2 rounded-xl text-xs font-bold bg-stone-100 text-stone-700";
+      document.getElementById("sub-btn-menu").className = sub === "menu" ? "px-4 py-2 rounded-xl text-xs font-bold bg-amber-700 text-white" : "px-4 py-2 rounded-xl text-xs font-bold bg-stone-100 text-stone-700";
     }
 
     async function loadAdminOrders() {
@@ -375,8 +478,8 @@
           <div class="space-y-1">
             <p class="font-bold">#${o.id} — ${o.customer_name} (${o.customer_phone})</p>
             <p class="text-xs text-stone-600">${o.scheduled_date} às ${o.scheduled_slot} (${o.delivery_type === 'delivery' ? o.address : 'Retirada'})</p>
-            <p class="text-xs">${o.items.map(i
-                        <p class="font-bold text-amber-800">R$ ${Number(o.total).toFixed(2)} —${o.payment_status}</p>
+            <p class="text-xs">${o.items.map(i => `${i.qty}x ${i.name} (${i.flavor})`).join(" • ")}</p>
+            <p class="font-bold text-amber-800">R$ ${Number(o.total).toFixed(2)} — ${o.payment_status}</p>
           </div>
           <div class="flex flex-col gap-2 min-w-[190px]">
             <select onchange="updateStatus(${o.id}, this.value)" class="border rounded-lg px-2 py-1.5 text-xs bg-white">
@@ -406,8 +509,8 @@
           </div>
           <div class="flex gap-2">
             <button onclick="editProduct(${p.id})" class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-900 font-bold">Editar</button>
-            <button onclick="toggleProductActive(${p.id},${!p.active})" class="px-3 py-1.5 rounded-lg bg-stone
-                        <button onclick="deleteProduct(${p.id})" class="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 font-bold">Excluir</button>
+            <button onclick="toggleProductActive(${p.id}, ${!p.active})" class="px-3 py-1.5 rounded-lg bg-stone-200 font-bold">${p.active ? 'Pausar' : 'Ativar'}</button>
+            <button onclick="deleteProduct(${p.id})" class="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 font-bold">Excluir</button>
           </div>
         </div>`).join("");
     }
