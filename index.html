@@ -376,4 +376,74 @@
             <p class="font-bold">#${o.id} — ${o.customer_name} (${o.customer_phone})</p>
             <p class="text-xs text-stone-600">${o.scheduled_date} às ${o.scheduled_slot} (${o.delivery_type === 'delivery' ? o.address : 'Retirada'})</p>
             <p class="text-xs">${o.items.map(i
-            
+                        <p class="font-bold text-amber-800">R$ ${Number(o.total).toFixed(2)} —${o.payment_status}</p>
+          </div>
+          <div class="flex flex-col gap-2 min-w-[190px]">
+            <select onchange="updateStatus(${o.id}, this.value)" class="border rounded-lg px-2 py-1.5 text-xs bg-white">
+              <option value="aguardando_pagamento" ${o.order_status === 'aguardando_pagamento' ? 'selected' : ''}>Aguardando Pagamento</option>
+              <option value="confirmado_pago" ${o.order_status === 'confirmado_pago' ? 'selected' : ''}>Confirmado / Pago</option>
+              <option value="em_preparo" ${o.order_status === 'em_preparo' ? 'selected' : ''}>Em Preparo</option>
+              <option value="pronto_entrega" ${o.order_status === 'pronto_entrega' ? 'selected' : ''}>Pronto / Saiu p/ Entrega</option>
+            </select>
+            <a href="https://wa.me/55${o.customer_phone}?text=${msg}" target="_blank" class="bg-emerald-600 text-white text-center text-xs font-bold py-2 rounded-lg">📲 WhatsApp Cliente</a>
+          </div>
+        </div>`;
+      }).join("");
+    }
+    async function updateStatus(id, st) { await sb.from("orders").update({ order_status: st }).eq("id", id); loadAdminOrders(); }
+
+    function renderAdminProducts() {
+      const list = document.getElementById("admin-products-list");
+      if (list) list.innerHTML = PRODUCTS.map(p => `
+        <div class="border rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-stone-50 text-xs">
+          <div class="flex items-center gap-3">
+            <img src="${p.img || 'https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?w=200&q=60'}" class="w-12 h-12 rounded-lg object-cover" />
+            <div>
+              <p class="font-bold text-sm">${p.name} <span class="${p.active ? 'text-emerald-600' : 'text-red-500'}">(${p.active ? 'Ativo' : 'Pausado'})</span></p>
+              <p class="text-amber-800 font-bold">R$ ${Number(p.price).toFixed(2).replace('.', ',')}</p>
+              <p class="text-stone-500">Sabores: ${(p.flavors || []).join(", ")}</p>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="editProduct(${p.id})" class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-900 font-bold">Editar</button>
+            <button onclick="toggleProductActive(${p.id},${!p.active})" class="px-3 py-1.5 rounded-lg bg-stone
+                        <button onclick="deleteProduct(${p.id})" class="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 font-bold">Excluir</button>
+          </div>
+        </div>`).join("");
+    }
+
+    async function saveProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById("edit-prod-id").value;
+      const fRaw = document.getElementById("prod-flavors").value;
+      const payload = {
+        name: document.getElementById("prod-name").value.trim(),
+        price: Number(document.getElementById("prod-price").value),
+        description: document.getElementById("prod-desc").value.trim(),
+        flavors: fRaw ? fRaw.split(",").map(s => s.trim()).filter(Boolean) : ["Tradicional"],
+        img: document.getElementById("prod-img").value.trim()
+      };
+      const res = id ? await sb.from("products").update(payload).eq("id", id) : await sb.from("products").insert([{ ...payload, active: true }]);
+      if (res.error) return alert("Erro ao salvar: " + res.error.message);
+      resetProductForm(); await loadProducts(); alert("Cardápio atualizado!");
+    }
+
+    function editProduct(id) {
+      const p = PRODUCTS.find(x => x.id === id); if (!p) return;
+      document.getElementById("edit-prod-id").value = p.id;
+      document.getElementById("prod-name").value = p.name;
+      document.getElementById("prod-price").value = p.price;
+      document.getElementById("prod-desc").value = p.description || "";
+      document.getElementById("prod-flavors").value = (p.flavors || []).join(", ");
+      document.getElementById("prod-img").value = p.img || "";
+      document.getElementById("prod-form-title").innerText = `Editando: ${p.name}`;
+      document.getElementById("btn-cancel-edit").classList.remove("hidden");
+    }
+    function resetProductForm() { document.getElementById("product-form").reset(); document.getElementById("edit-prod-id").value = ""; document.getElementById("prod-form-title").innerText = "+ Adicionar Novo Doce"; document.getElementById("btn-cancel-edit").classList.add("hidden"); }
+    async function toggleProductActive(id, st) { await sb.from("products").update({ active: st }).eq("id", id); await loadProducts(); }
+    async function deleteProduct(id) { if (!confirm("Excluir este item?")) return; await sb.from("products").delete().eq("id", id); await loadProducts(); }
+
+    loadProducts();
+  </script>
+</body>
+</html>
