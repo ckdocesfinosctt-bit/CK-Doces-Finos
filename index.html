@@ -319,4 +319,61 @@
           document.getElementById("pix-copy-paste").value = payData.qr_code;
           pollInterval = setInterval(async () => {
             const cRes = await fetch(`${SUPABASE_URL}/functions/v1/${EDGE_FUNCTION_NAME}`, {
-              method: "PO
+                            method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${SUPABASE_KEY}` },
+              body: JSON.stringify({ action: "check_status", paymentId: payData.payment_id, orderId: String(order.id) })
+            });
+            const st = await cRes.json();
+            if (st.status === "approved") { clearInterval(pollInterval); showOrderConfirmed(order); }
+          }, 4000);
+        } else { window.location.href = payData.init_point; }
+      } catch (err) { alert("Erro: " + err.message); }
+      finally { btn.disabled = false; btn.innerText = "Confirmar e Pagar"; }
+    }
+
+    function copyPix() { const i = document.getElementById("pix-copy-paste"); i.select(); navigator.clipboard.writeText(i.value); alert("Pix copiado!"); }
+    function showOrderConfirmed(order) {
+      document.getElementById("pix-payment-step").classList.add("hidden");
+      document.getElementById("order-confirmed-step").classList.remove("hidden");
+      const itens = order.items.map(i => `• ${i.qty}x ${i.name} (${i.flavor})`).join("%0A");
+      const msg = `Olá, CK Doces Finos! Paguei o pedido *#${order.id}*.%0A*Cliente:* ${order.customer_name}%0A*Data:* ${order.scheduled_date} (${order.scheduled_slot})%0A${itens}%0A*Total:* R$ ${Number(order.total).toFixed(2)}`;
+      document.getElementById("confirmed-summary").innerText = `Pedido #${order.id} agendado para ${order.scheduled_date} (${order.scheduled_slot}).`;
+      document.getElementById("btn-whatsapp-confirm").href = `https://wa.me/${STORE_WHATSAPP}?text=${msg}`;
+    }
+    
+
+    async function searchOrders() {
+      const phone = document.getElementById("search-phone").value.replace(/\D/g, "");
+      if (!phone) return alert("Digite seu telefone.");
+      const { data } = await sb.from("orders").select("*").eq("customer_phone", phone).order("created_at", { ascending: false });
+      document.getElementById("orders-results").innerHTML = !data?.length ? `<p class="text-sm text-stone-500 text-center py-4">Nenhum pedido encontrado.</p>` : data.map(o => `
+        <div class="border rounded-xl p-4 bg-stone-50 text-sm space-y-1">
+          <div class="flex justify-between font-bold"><span>Pedido #${o.id}</span><span class="uppercase text-xs px-2 py-0.5 rounded bg-amber-200">${o.order_status.replace('_', ' ')}</span></div>
+          <p class="text-xs text-stone-600">${o.scheduled_date} •${o.scheduled_slot}</p>
+          <p class="text-xs text-stone-600">${o.items.map(i => `${i.qty}x ${i.name}`).join(", ")}</p>
+          <p class="font-bold text-amber-800 pt-1">Total: R$ ${Number(o.total).toFixed(2)}</p>
+        </div>`).join("");
+    }
+
+    function switchTab(tab) { ["catalog", "orders", "admin"].forEach(t => document.getElementById(`view-${t}`).classList.add("hidden")); document.getElementById(`view-${tab}`).classList.remove("hidden"); }
+    function openAdmin() {
+      const pin = prompt("Digite a senha da confeitaria:");
+      if (pin === ADMIN_PIN) { switchTab("admin"); loadAdminOrders(); renderAdminProducts(); }
+      else if (pin !== null) alert("Senha incorreta.");
+    }
+    function switchAdminSub(sub) {
+      document.getElementById("admin-sub-orders").classList.toggle("hidden", sub !== "orders");
+      document.getElementById("admin-sub-menu").classList.toggle("hidden", sub !== "menu");
+      document.getElementById("sub-btn-orders").className = sub === "orders" ? "px-4 py-2 rounded-xl bg-amber-700 text-white" : "px-4 py-2 rounded-xl bg-stone-100 text-stone-700";
+      document.getElementById("sub-btn-menu").className = sub === "menu" ? "px-4 py-2 rounded-xl bg-amber-700 text-white" : "px-4 py-2 rounded-xl bg-stone-100 text-stone-700";
+    }
+
+    async function loadAdminOrders() {
+      const { data } = await sb.from("orders").select("*").order("created_at", { ascending: false });
+      document.getElementById("admin-orders-list").innerHTML = !data?.length ? `<p class="text-sm text-stone-400">Nenhuma encomenda ainda.</p>` : data.map(o => {
+        const msg = `Olá, *${o.customer_name}*! Aqui é da *CK Doces Finos* 🍫.%0ASeu pedido *#${o.id}* para *${o.scheduled_date}* (${o.scheduled_slot}) está *${o.order_status.replace('_', ' ').toUpperCase()}*.`;
+        return `<div class="border rounded-xl p-4 flex flex-col sm:flex-row justify-between gap-4 text-sm bg-stone-50">
+          <div class="space-y-1">
+            <p class="font-bold">#${o.id} — ${o.customer_name} (${o.customer_phone})</p>
+            <p class="text-xs text-stone-600">${o.scheduled_date} às ${o.scheduled_slot} (${o.delivery_type === 'delivery' ? o.address : 'Retirada'})</p>
+            <p class="text-xs">${o.items.map(i
+            
